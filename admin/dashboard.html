@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+html lang="zh-CN">
+head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>管理后台</title>
+   <style>
+       /* 原有样式保持不变 */
+       .feedback-item {
+           background: #f8f9fa;
+           padding: 15px;
+           margin-bottom: 15px;
+           border-radius: 8px;
+           border-left: 4px solid #1a237e;
+       }
+       .feedback-time {
+           color: #666;
+           font-size: 0.9em;
+           margin-top: 5px;
+       }
+       .refresh-btn {
+           background: #1a237e;
+           color: white;
+           border: none;
+           padding: 10px 20px;
+           border-radius: 4px;
+           cursor: pointer;
+           margin-bottom: 20px;
+       }
+       .refresh-btn:hover {
+           background: #283593;
+       }
+   </style>
+/head>
+body>
+   <script>
+       // 检查是否登录
+       if(!localStorage.getItem('adminLoggedIn')) {
+           window.location.href = 'login.html';
+       }
+   </script>
+    <div class="admin-container">
+       <div class="admin-sidebar">
+           <h2>管理菜单</h2>
+           <ul>
+               <li><a href="#" onclick="showPanel('feedback')">意见反馈</a></li>
+               <li><a href="#" onclick="showPanel('chat')">聊天记录</a></li>
+               <li><a href="#" onclick="logout()">退出登录</a></li>
+           </ul>
+       </div>
+       
+       <div class="admin-content">
+           <div id="feedbackPanel" style="display: none;">
+               <h2>意见反馈管理</h2>
+               <button class="refresh-btn" onclick="loadFeedbacks()">刷新反馈</button>
+               <div id="feedbackList">
+                   <!-- 反馈内容将在这里显示 -->
+               </div>
+           </div>
+            <div id="chatPanel" style="display: none;">
+               <h2>聊天记录</h2>
+               <button class="refresh-btn" onclick="loadChats()">刷新聊天记录</button>
+               <div id="chatList">
+                   <!-- 聊天记录将在这里显示 -->
+               </div>
+           </div>
+       </div>
+   </div>
+    <script>
+       // 显示面板
+       function showPanel(panelName) {
+           document.querySelectorAll('[id$="Panel"]').forEach(panel => {
+               panel.style.display = 'none';
+           });
+           document.getElementById(panelName + 'Panel').style.display = 'block';
+           
+           // 加载对应的数据
+           if(panelName === 'feedback') {
+               loadFeedbacks();
+           } else if(panelName === 'chat') {
+               loadChats();
+           }
+       }
+        // 加载反馈
+       function loadFeedbacks() {
+           const feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+           const feedbackList = document.getElementById('feedbackList');
+           
+           if(feedbacks.length === 0) {
+               feedbackList.innerHTML = '<p>暂无反馈信息</p>';
+               return;
+           }
+            feedbackList.innerHTML = feedbacks.reverse().map(feedback => `
+               <div class="feedback-item">
+                   <div class="feedback-content">${feedback.text}</div>
+                   <div class="feedback-time">提交时间：${new Date(feedback.time).toLocaleString()}</div>
+               </div>
+           `).join('');
+       }
+        // 加载聊天记录
+       function loadChats() {
+           const messages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+           const chatList = document.getElementById('chatList');
+           
+           if(messages.length === 0) {
+               chatList.innerHTML = '<p>暂无聊天记录</p>';
+               return;
+           }
+            chatList.innerHTML = messages.map(msg => `
+               <div class="feedback-item">
+                   <strong>${msg.user}：</strong>
+                   <div class="feedback-content">${msg.text}</div>
+                   <div class="feedback-time">${new Date(msg.time).toLocaleString()}</div>
+               </div>
+           `).join('');
+       }
+        // 退出登录
+       function logout() {
+           localStorage.removeItem('adminLoggedIn');
+           window.location.href = 'login.html';
+       }
+        // 初始显示反馈面板
+       showPanel('feedback');
+   </script>
+/body>
+/html>
